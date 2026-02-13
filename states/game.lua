@@ -1,7 +1,10 @@
 local love = require("love")
 local Text = require("components.text")
+local Asteroids = require("objects.asteroids")
+
 function Game()
 	return {
+		level = 1,
 		states = {
 			menu = false,
 			paused = false,
@@ -27,6 +30,17 @@ function Game()
 					"center"
 				):draw()
 			end
+		end,
+
+		startNewGame = function(self, player)
+			self:changeGameStated("running")
+			--行星列表
+			asteroids = {}
+
+			local ast_x = math.floor(math.random(love.graphics.getWidth()))
+			local ast_y = math.floor(math.random(love.graphics.getHeight()))
+
+			table.insert(asteroids, 1, Asteroids(ast_x, ast_y, 100, self.level, true))
 		end,
 	}
 end

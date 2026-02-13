@@ -23,7 +23,7 @@ function Player(debugging)
 			big_flame = false,
 			flame = 1.6, --火焰大小系数
 		},
-		move = function(self)
+		move = function(self,dt)
 			local FPS = love.timer.getFPS()
 			--减速系数
 			local friction = 1
@@ -39,7 +39,7 @@ function Player(debugging)
 			end
 
 			if self.thrusting then
-				local dt = 1 / FPS
+				-- local dt = 1 / FPS
 				self.thrust.x = self.thrust.x + self.thrust.speed * math.cos(self.angle) * dt
 				self.thrust.y = self.thrust.y - self.thrust.speed * math.sin(self.angle) * dt -- 减号：屏幕y向下
 			else
@@ -56,8 +56,10 @@ function Player(debugging)
 			elseif self.x > w - self.radius then
 				self.x = w - self.radius
 			end
-			if self.y>=self.radius then
-				self.y = self.y + self.thrust.y
+			if self.y<self.radius then
+				self.y = self.radius
+			elseif self.y > h - self.radius then
+				self.y = h - self.radius
 			end
 		end,
 		--加速时火焰绘制函数
