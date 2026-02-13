@@ -16,7 +16,7 @@ end
 function love.update(dt)
 	if game.states.running then
 		player:move(dt)
-        for _,asteroid in pairs(asteroids) do
+        for ast_index,asteroid in pairs(asteroids) do
             asteroid:move(dt)
         end
 	end
@@ -27,7 +27,7 @@ function love.draw()
 	if game.states.running or game.states.paused then
 		game:draw(game.states.paused)
 		player:draw(game.states.paused)
-        for _,asteroid in pairs(asteroids) do
+        for ast_index,asteroid in pairs(asteroids) do
             asteroid:draw(game.states.paused)
         end
 	end

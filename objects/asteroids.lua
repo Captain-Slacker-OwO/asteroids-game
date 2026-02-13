@@ -66,6 +66,19 @@ function Asteroids(x, y, ast_size, level, debugging)
 		move = function(self, dt)
 			self.x = self.x + self.x_vel * dt
 			self.y = self.y + self.y_vel * dt
+			
+			local w, h = love.graphics.getWidth(), love.graphics.getHeight()
+
+			if self.x < -self.radius then
+				self.x = w - self.radius -- 从左边界穿出 → 出现在右边界内侧
+			elseif self.x > w - self.radius then
+				self.x = self.radius -- 从右边界穿出 → 出现在左边界内侧
+			end
+			if self.y < self.radius then
+				self.y = h - self.radius -- 从上边界穿出 → 出现在下边界内侧
+			elseif self.y > h - self.radius then
+				self.y = self.radius -- 从下边界穿出 → 出现在上边界内侧
+			end
 		end,
 	}
 end

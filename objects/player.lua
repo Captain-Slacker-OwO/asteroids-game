@@ -23,7 +23,7 @@ function Player(debugging)
 			big_flame = false,
 			flame = 1.6, --火焰大小系数
 		},
-		move = function(self,dt)
+		move = function(self, dt)
 			local FPS = love.timer.getFPS()
 			--减速系数
 			local friction = 1
@@ -50,16 +50,18 @@ function Player(debugging)
 			end
 			self.x = self.x + self.thrust.x
 			self.y = self.y + self.thrust.y
+			
 			local w, h = love.graphics.getWidth(), love.graphics.getHeight()
-			if self.x<self.radius then
-				self.x = self.radius
+
+			if self.x < -self.radius then
+				self.x = w - self.radius   -- 从左边界穿出 → 出现在右边界内侧
 			elseif self.x > w - self.radius then
-				self.x = w - self.radius
+				self.x = self.radius      -- 从右边界穿出 → 出现在左边界内侧
 			end
-			if self.y<self.radius then
-				self.y = self.radius
+			if self.y < self.radius then
+				self.y = h - self.radius  -- 从上边界穿出 → 出现在下边界内侧
 			elseif self.y > h - self.radius then
-				self.y = h - self.radius
+				self.y = self.radius      -- 从下边界穿出 → 出现在上边界内侧
 			end
 		end,
 		--加速时火焰绘制函数
@@ -92,10 +94,10 @@ function Player(debugging)
 			love.graphics.polygon(fillType, x1, y1, x2, y2, x3, y3)
 		end,
 
-		draw = function(self,faded)
+		draw = function(self, faded)
 			local opacity = 1
 			if faded then
-				opacity=0.2
+				opacity = 0.2
 			end
 			if self.thrusting then
 				-- if not self.thrust.big_flame then
@@ -118,7 +120,7 @@ function Player(debugging)
 				love.graphics.circle("line", self.x, self.y, self.radius)
 			end
 
-			love.graphics.setColor(1, 1, 1,opacity)
+			love.graphics.setColor(1, 1, 1, opacity)
 			-- 经典三角飞船：机头 + 左后、右后两个顶点
 			--机头距离
 			local nose = 4 / 3 * self.radius
