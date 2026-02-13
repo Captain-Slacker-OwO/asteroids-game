@@ -1,4 +1,5 @@
 local love = require("love")
+local Lazer = require("objects.Lazer")
 
 function Player(debugging)
 	local SHIP_SIZE = 50
@@ -13,6 +14,7 @@ function Player(debugging)
 		radius = SHIP_SIZE / 2,
 		angle = VIEW_ANGLE,
 		rotation = 0,
+		lazers = {},
 		--加速状态
 		thrusting = false,
 		--加速方向，速度
@@ -23,6 +25,7 @@ function Player(debugging)
 			big_flame = false,
 			flame = 1.6, --火焰大小系数
 		},
+
 		move = function(self, dt)
 			local FPS = love.timer.getFPS()
 			--减速系数
@@ -50,19 +53,27 @@ function Player(debugging)
 			end
 			self.x = self.x + self.thrust.x
 			self.y = self.y + self.thrust.y
-			
+
 			local w, h = love.graphics.getWidth(), love.graphics.getHeight()
 
 			if self.x < -self.radius then
-				self.x = w - self.radius   -- 从左边界穿出 → 出现在右边界内侧
+				self.x = w - self.radius -- 从左边界穿出 → 出现在右边界内侧
 			elseif self.x > w - self.radius then
-				self.x = self.radius      -- 从右边界穿出 → 出现在左边界内侧
+				self.x = self.radius -- 从右边界穿出 → 出现在左边界内侧
 			end
 			if self.y < self.radius then
-				self.y = h - self.radius  -- 从上边界穿出 → 出现在下边界内侧
+				self.y = h - self.radius -- 从上边界穿出 → 出现在下边界内侧
 			elseif self.y > h - self.radius then
-				self.y = self.radius      -- 从下边界穿出 → 出现在上边界内侧
+				self.y = self.radius -- 从下边界穿出 → 出现在上边界内侧
 			end
+			
+			for lazer_index,lazer in pairs(self.lazers) do
+				lazer:move(dt)
+				if lazer.distance>love.graphics.getWidth() then
+					self:destroy_lazers(lazer_index)
+				end
+			end
+
 		end,
 		--加速时火焰绘制函数
 		draw_flame_thrust = function(self, fillType, color)
@@ -93,7 +104,14 @@ function Player(debugging)
 
 			love.graphics.polygon(fillType, x1, y1, x2, y2, x3, y3)
 		end,
-
+		--绘制激光函数
+		draw_lazers = function(self) 
+			table.insert(self.lazers,Lazer(self.x,self.y,self.angle))
+		end,
+		destroy_lazers=function (self,index)
+			table.remove(self.lazers,index)
+		end,
+			
 		draw = function(self, faded)
 			local opacity = 1
 			if faded then
@@ -140,6 +158,10 @@ function Player(debugging)
 			local y3 = self.y - rear * math.sin(rightAngle)
 
 			love.graphics.polygon("line", x1, y1, x2, y2, x3, y3)
+
+			for _,lazer in pairs(self.lazers) do
+				lazer:draw(faded)
+			end
 		end,
 	}
 end

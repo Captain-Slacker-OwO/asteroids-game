@@ -8,17 +8,19 @@ function love.load()
 	love.mouse.setVisible(false)
 	mouse_x, mouse_y = 0, 0
 	local show_debugging = true
-	player = Player(show_debugging) 
+	player = Player(show_debugging)
 	game = Game()
-    game:startNewGame(player)
+	game:startNewGame(player)
 end
 
 function love.update(dt)
 	if game.states.running then
 		player:move(dt)
-        for ast_index,asteroid in pairs(asteroids) do
-            asteroid:move(dt)
-        end
+		
+		for ast_index, asteroid in pairs(asteroids) do
+			asteroid:move(dt)
+		end
+		
 	end
 	mouse_x, mouse_y = love.mouse.getPosition()
 end
@@ -27,16 +29,22 @@ function love.draw()
 	if game.states.running or game.states.paused then
 		game:draw(game.states.paused)
 		player:draw(game.states.paused)
-        for ast_index,asteroid in pairs(asteroids) do
-            asteroid:draw(game.states.paused)
-        end
+		for ast_index, asteroid in pairs(asteroids) do
+			asteroid:draw(game.states.paused)
+		end
 	end
 	love.graphics.setColor(1, 1, 1, 1)
 
 	love.graphics.print(love.timer.getFPS(), 10, 10)
 end
 
-function love.mousepressed() end
+function love.mousepressed(x, y, button, istouch, presses)
+	if button==1 then
+		if game.states.running then
+			player:draw_lazers()
+		end
+	end
+end
 
 function love.keypressed(key)
 	if game.states.running then
@@ -46,6 +54,9 @@ function love.keypressed(key)
 		end
 		if key == "escape" then
 			game:changeGameStated("paused")
+		end
+		if key == "space" then
+			player:draw_lazers()
 		end
 	elseif game.states.paused then
 		if key == "escape" then
