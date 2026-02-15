@@ -66,7 +66,7 @@ function Asteroids(x, y, ast_size, level, debugging)
 		move = function(self, dt)
 			self.x = self.x + self.x_vel * dt
 			self.y = self.y + self.y_vel * dt
-			
+
 			local w, h = love.graphics.getWidth(), love.graphics.getHeight()
 
 			if self.x < -self.radius then
@@ -79,6 +79,17 @@ function Asteroids(x, y, ast_size, level, debugging)
 			elseif self.y > h - self.radius then
 				self.y = self.radius -- 从下边界穿出 → 出现在上边界内侧
 			end
+		end,
+
+		destroy = function(self, asteroids_table, index, game)
+			-- 子碎片要比父级小：用 ast_size/2 作为新尺寸，而不是 self.radius（radius 本身约等于 ast_size/2）
+			local child_ast_size = math.max(2, math.ceil(ast_size / 2))
+			local min_asteroid_radius = 30 -- 半径小于等于此值时不再分裂
+			if self.radius > min_asteroid_radius then
+				table.insert(asteroids_table, Asteroids(self.x, self.y, child_ast_size, game.level, SHOW_DEBUGGING))
+				table.insert(asteroids_table, Asteroids(self.x, self.y, child_ast_size, game.level, SHOW_DEBUGGING))
+			end
+			table.remove(asteroids_table, index)
 		end,
 	}
 end

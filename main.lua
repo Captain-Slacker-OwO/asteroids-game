@@ -1,14 +1,13 @@
 local love = require("love")
 local Player = require("objects.player")
 local Game = require("states.game")
-local Asteroids = require("objects.asteroids")
-
+-- local Asteroids = require("objects.asteroids")
+require("globals")
 math.randomseed(os.time())
 function love.load()
 	love.mouse.setVisible(false)
 	mouse_x, mouse_y = 0, 0
-	local show_debugging = true
-	player = Player(show_debugging)
+	player = Player(SHOW_DEBUGGING)
 	game = Game()
 	game:startNewGame(player)
 end
@@ -16,11 +15,29 @@ end
 function love.update(dt)
 	if game.states.running then
 		player:move(dt)
-		
+
 		for ast_index, asteroid in pairs(asteroids) do
+			if not player.exploding then
+				if calculateDistance(player.x, player.y, asteroid.x, asteroid.y) < asteroid.radius+player.radius then
+					player:explode()
+					DESTROY_AST = true
+				end
+			else
+				player.explode_time = player.explode_time - 1
+			end
+
+			for lazer_index, lazer in pairs(player.lazers) do
+				if calculateDistance(lazer.x, lazer.y, asteroid.x, asteroid.y) < asteroid.radius then
+					lazer:explode()
+					asteroid:destroy(asteroids, ast_index, game)
+				end
+			end
+			if DESTROY_AST then
+				DESTROY_AST = false
+				asteroid:destroy(asteroids, ast_index, game)
+			end
 			asteroid:move(dt)
 		end
-		
 	end
 	mouse_x, mouse_y = love.mouse.getPosition()
 end
@@ -39,7 +56,7 @@ function love.draw()
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
-	if button==1 then
+	if button == 1 then
 		if game.states.running then
 			player:draw_lazers()
 		end
