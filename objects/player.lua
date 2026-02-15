@@ -28,6 +28,34 @@ function Player(debugging)
 			flame = 1.6, --火焰大小系数
 		},
 
+		lives = 3,
+		
+		draw_lives = function(self, faded)
+			local opacity = 1
+			if faded then
+				opacity = 0.2
+			end
+			if self.lives==2 then
+				love.graphics.setColor(1, 1, 0, opacity)
+			elseif self.lives ==1 then
+				love.graphics.setColor(1, 1, 0, opacity)
+			else
+				love.graphics.setColor(1, 1, 1, opacity)
+			end
+
+			local x_pos,y_pos=45,30
+			for i=1,self.lives do
+				love.graphics.polygon(
+				"line",
+				x_pos+(i-1)*30 + self.radius * math.cos(self.angle),
+				y_pos - self.radius * math.sin(self.angle),
+				x_pos+(i-1)*30 + self.radius * math.cos(self.angle +  math.rad(120)),
+				y_pos - self.radius * math.sin(self.angle + math.rad(120)),
+				x_pos+(i-1)*30 + self.radius * math.cos(self.angle + math.rad(240)),
+				y_pos - self.radius * math.sin(self.angle + math.rad(240))
+			)
+			end
+		end,
 		move = function(self, dt)
 			self.exploding = self.explode_time > 0
 			-- if not self.exploding then
@@ -128,6 +156,7 @@ function Player(debugging)
 			if faded then
 				opacity = 0.2
 			end
+			self:draw_lives(faded)
 			--未爆炸时绘制飞船火焰
 			if not self.exploding then
 				if self.thrusting then
@@ -173,12 +202,12 @@ function Player(debugging)
 			end
 		end,
 
-		explode=function(self)
-			self.explode_time=math.ceil(explode_dur*love.timer.getFPS())
+		explode = function(self)
+			self.explode_time = math.ceil(explode_dur * love.timer.getFPS())
 			-- if self.explod_time>explode_dur then
 			-- 	self.exploding=true
 			-- end
-		end
+		end,
 	}
 end
 
