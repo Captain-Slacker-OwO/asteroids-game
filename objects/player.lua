@@ -1,12 +1,13 @@
 local love = require("love")
 local Lazer = require("objects.Lazer")
 
-function Player(debugging)
+function Player(debugging, initial_lives)
 	local SHIP_SIZE = 50
 	local VIEW_ANGLE = math.rad(90) --船头角度
 	local THRUST_ACCEL = 1 -- 每秒增加的速度（像素/秒）
 	local explode_dur = 3
 	debugging = debugging or false
+	initial_lives = initial_lives or 3
 
 	return {
 		x = love.graphics.getWidth() / 2,
@@ -28,7 +29,7 @@ function Player(debugging)
 			flame = 1.6, --火焰大小系数
 		},
 
-		lives = 3,
+		lives = initial_lives,
 		
 		draw_lives = function(self, faded)
 			local opacity = 1
