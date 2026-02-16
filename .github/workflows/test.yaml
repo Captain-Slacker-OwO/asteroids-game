@@ -1,0 +1,39 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types: [opened]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # container:
+    steps:
+      # 检查代码
+      - name: Checkout
+        uses: actions/checkout@v4
+      # 设置 Lua
+      - name: Set up Lua
+        uses: leafo/gh-actions-lua@v9
+        with:
+          luaVersion: "5.1"
+      # 安装 LÖVE
+      - name: Install LÖVE
+        run: |
+          sudo add-apt-repository ppa:bartbes/love-stable -y
+          sudo apt-get update
+          sudo apt-get install -y love
+      # 验证 LÖVE
+      - name: Verify LÖVE
+        run: love --version
+      # 运行 Luacheck
+      - name: Run Luacheck
+        run: |
+          luarocks install luacheck
+          luacheck . --no-color -q
+        continue-on-error: true
