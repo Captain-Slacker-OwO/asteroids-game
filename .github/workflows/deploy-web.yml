@@ -1,0 +1,64 @@
+# Love2D 网页版：用 love.js 打包并部署到 GitHub Pages
+# 使用方式：打 tag 推送后自动构建并发布，例如 git tag v1.0.0 && git push --tags
+name: Deploy Web
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-and-deploy:
+    name: Build Love2D for Web & Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Create .love package
+        run: |
+          zip -r game.love . \
+            -x "*.git*" \
+            -x ".github/*" \
+            -x "*.md" \
+            -x "Jenkinsfile" \
+            -x "*.love" \
+            -x "web-build/*"
+
+      - name: Build for web (love.js)
+        run: |
+          npx love.js@latest game.love web-build -c -t "Asteroids"
+        env:
+          CI: true
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web-build
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
