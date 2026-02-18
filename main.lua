@@ -13,42 +13,43 @@ function love.load()
 end
 
 function love.update(dt)
+	mouse_x, mouse_y = love.mouse.getPosition()
 	if game.states.running then
 		player:move(dt)
-
 		for ast_index, asteroid in pairs(asteroids) do
+			asteroid:move(dt)
+			--玩家与行星碰撞检测
 			if not player.exploding then
 				if calculateDistance(player.x, player.y, asteroid.x, asteroid.y) < asteroid.radius + player.radius then
 					player:explode()
 					DESTROY_AST = true
 				end
 			else
+				--爆炸倒数
 				player.explode_time = player.explode_time - 1
-				if player.explode_time == 0 then
-					if player.lives - 1 <= 0 then
-						game:changeGameStated("ended")
+				if player.explode_time == 0 then --爆炸结束
+					if player.lives - 1 <= 0 then --玩家死亡
+						game:changeGameStated("ended") --游戏结束
 						return
 					end
 					player = Player(SHOW_DEBUGGING, player.lives - 1)
 				end
 			end
-
+			--激光与行星碰撞检测
 			for lazer_index, lazer in pairs(player.lazers) do
 				if calculateDistance(lazer.x, lazer.y, asteroid.x, asteroid.y) < asteroid.radius then
 					lazer:explode()
 					asteroid:destroy(asteroids, ast_index, game)
 				end
 			end
-			if DESTROY_AST then
-				DESTROY_AST = false
-				asteroid:destroy(asteroids, ast_index, game)
+
+			if DESTROY_AST then --行星销毁
+				DESTROY_AST = false --销毁标志清零
+				asteroid:destroy(asteroids, ast_index, game) --销毁行星
 			end
-			asteroid:move(dt)
 		end
 	end
-	mouse_x, mouse_y = love.mouse.getPosition()
 end
-
 
 function love.draw()
 	if game.states.running or game.states.paused then
